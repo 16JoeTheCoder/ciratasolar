@@ -18,13 +18,15 @@
   <div class="wrap head">
     <div>
       <h1>Cirata Floating Solar</h1>
-      <p class="sub">192 MWp DC · 145 MWac · Cirata reservoir, West Java, Indonesia</p>
+      <p class="sub">192 MWp DC <button class="info" data-k="mwp">i</button> · 145 MWac · DC/AC 1.32 <button class="info" data-k="dcac">i</button> · Cirata reservoir, West Java</p>
+      <p class="sub small" id="version"></p>
     </div>
     <div class="controls">
       <div class="seg" role="group" aria-label="View mode">
         <button type="button" data-mode="light" aria-pressed="true">Light</button>
         <button type="button" data-mode="detailed" aria-pressed="false">Detailed</button>
       </div>
+      <a class="btn" href="#method" id="method-link">Methodology</a>
       <a class="btn" href="brief.pdf" download>PDF brief</a>
     </div>
   </div>
@@ -32,6 +34,7 @@
 
 <main class="wrap">
   <p id="synthetic" class="banner danger" hidden><strong>Synthetic weather.</strong> No real weather data was available when these numbers were built. Every figure on this page tests the pipeline only and is <strong>not</strong> an estimate of Cirata's output.</p>
+  <p id="wx-line" class="banner small" hidden></p>
   <p class="banner tier"><strong>What this is:</strong> Cirata publishes only annual and cumulative output, so this is a forecast from a physics model, checked against sparse reports. It is not a calibrated model and it is not live data.</p>
 
   <section class="scene-card">
@@ -44,9 +47,9 @@
       <rect width="800" height="300" fill="url(#sky)"/>
       <circle id="sun" r="46" fill="url(#sunglow)"/>
       <path class="hill" d="M0 200 Q90 150 190 185 T380 175 Q470 140 560 180 T800 170 V215 H0Z"/>
-      <rect y="205" width="800" height="95" fill="url(#water)"/>
+      <g class="lake"><rect y="205" width="800" height="95" fill="url(#water)"/>
       <g id="ripples"></g>
-      <g id="array"></g>
+      <g id="array"></g></g>
     </svg>
     <div class="readout">
       <p class="now"><span id="now-mw">–</span> <span class="unit">MW</span> <button class="info" data-k="now">i</button></p>
@@ -55,6 +58,7 @@
       <div class="scrub">
         <label>Month <select id="month"></select></label>
         <label>Hour (WIB) <input id="hour" type="range" min="0" max="23" step="1"></label>
+        <label>Scenario <select id="scen"><option value="low">Low</option><option value="mid" selected>Mid</option><option value="high">High</option></select></label>
         <button id="reset-now" type="button" class="link">Now</button>
       </div>
     </div>
@@ -77,28 +81,84 @@
     <p class="muted small">Reported figures were not used to set any parameter. Each row shows what the model expects for exactly that reporting period.</p>
     <div id="score"></div>
     <div class="key small muted"><span><i class="k env"></i>Envelope (all scenarios, all weather years)</span><span><i class="k band"></i>Mid scenario, 10th–90th percentile of weather years</span><span><i class="k p50"></i>Mid median</span><span><i class="k rep"></i>Reported</span></div>
+    <p id="flip" class="note small" hidden></p>
+    <details class="detail"><summary>Claims (not measurements)</summary><div id="claims"></div><p class="small" id="ugm"></p></details>
+  </section>
+
+  <section class="detail" id="method">
+    <details><summary><h2>Methodology and assumptions <button class="info" data-k="tags">i</button></h2></summary>
+      <p class="small muted">FIXED = reported value used as given. ASSUMED = not public, so we pick a range. TUNED = fitted to reported output: <b>none</b>. Reported output never sets a parameter.</p>
+      <div class="table-wrap"><table id="assump"><thead><tr><th>Input</th><th>Class</th><th>Low</th><th>Mid</th><th>High</th><th>Unit</th><th>Basis</th></tr></thead><tbody></tbody></table></div>
+      <h3>Plant facts</h3>
+      <div class="table-wrap"><table id="hardware"><tbody></tbody></table></div>
+      <h3>Weather data</h3>
+      <ul id="wx-detail" class="small"></ul>
+    </details>
   </section>
 
   <section class="detail">
-    <h2>Monthly energy <button class="info" data-k="monthly">i</button></h2>
-    <svg id="monthly" viewBox="0 0 640 220" role="img" aria-label="Monthly energy bars"></svg>
+    <details><summary><h2>Loss waterfall <button class="info" data-k="waterfall">i</button></h2></summary>
+      <p class="small muted" id="wf-cap"></p><div id="waterfall"></div></details>
   </section>
 
   <section class="detail">
-    <h2>Assumptions <button class="info" data-k="tags">i</button></h2>
-    <div class="table-wrap"><table id="assump"><thead><tr><th>Item</th><th>Low</th><th>Mid</th><th>High</th><th>Unit</th><th>Tag</th><th>Basis</th></tr></thead><tbody></tbody></table></div>
-    <p class="muted small" id="sens"></p>
+    <details><summary><h2>Sensitivity <button class="info" data-k="tornado">i</button></h2></summary>
+      <p class="small muted" id="tor-cap"></p><div id="tornado"></div></details>
   </section>
 
   <section class="detail">
-    <h2>Sources</h2>
-    <ul id="sources" class="sources"></ul>
-    <p class="muted small" id="meta"></p>
+    <details><summary><h2>Seasons and Calibration Lab <button class="info" data-k="monthly">i</button></h2></summary>
+      <svg id="monthly" viewBox="0 0 640 254" role="img" aria-label="Monthly energy bars with wet and dry seasons"></svg>
+      <p class="small" id="season-note"></p>
+      <div class="lab">
+        <h3>Calibration Lab <span class="tag inference">separate mode</span></h3>
+        <p class="small muted">Move the sliders to see which settings would match two reports, using that period's actual weather. Many combinations fit, so a fit is non-unique. Nothing here changes the default scenario, the headline numbers or the scoreboard.</p>
+        <div id="lab"></div>
+      </div>
+    </details>
+  </section>
+
+  <section class="detail">
+    <details><summary><h2>Hydro, solar and the reservoir</h2></summary>
+      <svg id="hydro" viewBox="0 0 640 200" role="img" aria-label="Mean daily PV profile beside the hydro peaking window"></svg>
+      <p class="small muted">Hydro window from secondary sources; no published hourly hydro data.</p>
+      <div class="table-wrap"><table id="hydro-facts"><tbody></tbody></table></div>
+      <div class="reservoir">
+        <div id="res-scene"></div>
+        <label class="small">Water level <input id="level" type="range" min="205" max="220" step="1" value="220"> <span id="level-v">+220 m</span></label>
+        <p class="small muted">Floats rise and fall with the water; the hydro units stop below +205 m. Illustration only.</p>
+      </div>
+    </details>
+  </section>
+
+  <section class="detail">
+    <details><summary><h2>Economics and expansion</h2></summary>
+      <div id="econ" class="stats"></div>
+      <p class="small" id="econ-note"></p>
+      <label class="small">Expansion <select id="expand"></select></label>
+      <p class="small" id="expand-out"></p>
+    </details>
+  </section>
+
+  <section class="detail">
+    <details><summary><h2>Contradictions ledger</h2></summary>
+      <div class="table-wrap"><table id="contra"><thead><tr><th>Topic</th><th>Values (who said it)</th><th>Used here</th></tr></thead><tbody></tbody></table></div>
+    </details>
+  </section>
+
+  <section id="sources-sec">
+    <details id="sources"><summary><h2>Sources</h2></summary>
+      <div id="src-list"></div>
+      <h3>Not public</h3><p class="small" id="not-public"></p>
+      <h3>Licences and attribution</h3>
+      <p class="small">Weather: NASA POWER (NASA Langley Research Center). Cross-check: PVGIS © European Union; contains modified Copernicus Climate Change Service information. Map dots: Natural Earth (public domain) via world-atlas. Operator, supplier and news photos, diagrams and text are cited only, never reproduced. No BMKG raw data is used or redistributed. Links listed as of <span class="asof"></span>.</p>
+      <p class="muted small" id="meta"></p>
+    </details>
   </section>
 </main>
 
 <div id="pop" role="dialog" hidden><p></p><button type="button">Close</button></div>
-<footer class="wrap muted small">Student beta. Built with pvlib; weather, parameters and provenance are listed under Detailed. Times shown in WIB (UTC+7).</footer>
+<footer class="wrap muted small">Student beta. Built with pvlib on NASA POWER weather. Times shown in WIB (UTC+7). Superscript numbers link to the Sources list.</footer>
 <script src="app.js"></script>
 </body>
 </html>

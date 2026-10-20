@@ -6,11 +6,13 @@ import pandas as pd
 import pvlib
 import pytest
 
+import build
 import pvsim
 import weather
 
-CFG = json.loads((Path(__file__).parents[1] / "config/cirata/config.json").read_text())
-SITE, WS = CFG["site"], CFG["weather"]["water_surface"]
+ROOT = Path(__file__).parents[1]
+CFG = json.loads((ROOT / "config/cirata/config.json").read_text())
+SITE = CFG["site"]
 LIMIT = SITE["ac_limit_kw"]
 
 
@@ -31,7 +33,7 @@ def test_spa_reference_case():
 
 def test_night_output_is_zero(wx):
     for s in pvsim.SCENARIOS:
-        r = pvsim.simulate(wx, SITE, pvsim.scenario(CFG, s), WS)
+        r = pvsim.simulate(wx, SITE, pvsim.scenario(CFG, s))
         assert (r.ac_kw[r.elevation < 0] == 0).all()
         assert (r.ac_kw >= 0).all()
 
@@ -40,21 +42,31 @@ def test_never_exceeds_ac_limit(wx):
     hot = wx.assign(ghi=wx.ghi * 1.4, dni=wx.dni * 1.4, dhi=wx.dhi * 1.4, temp_air=15.0)
     for s in pvsim.SCENARIOS:
         p = pvsim.scenario(CFG, s)
-        ac = pvsim.simulate(hot, SITE, p, WS).ac_kw
-        assert ac.max() <= LIMIT
+        r = pvsim.simulate(hot, SITE, p, stages=True)
+        assert r.ac_kw.max() <= LIMIT
+        assert r.stage_inverter_clip.max() <= SITE["inverter_ac_kw"]
         # Clipping is exercised; outages scale down the whole plant, inverters included.
-        assert ac.max() == pytest.approx(LIMIT * p["availability"])
+        assert r.ac_kw.max() == pytest.approx(LIMIT * p["availability"])
+        local = r.index.tz_convert(None) + pd.Timedelta(hours=7)
+        build.check_energy(pd.Series(r.ac_kw.to_numpy(), index=local), SITE)
+
+
+def test_mean_profile_peaks_at_midday_wib(wx):
+    r = pvsim.simulate(wx, SITE, pvsim.scenario(CFG, "mid"))
+    e = pd.Series(r.ac_kw.to_numpy(), index=r.index.tz_convert(None) + pd.Timedelta(hours=7))
+    assert build.check_peak_hour(e) in (11, 12)
+    with pytest.raises(SystemExit):  # data stamped in local time but read as UTC shifts the peak by 7 h
+        build.check_peak_hour(pd.Series(r.ac_kw.to_numpy(), index=r.index.tz_convert(None) + pd.Timedelta(hours=14)))
 
 
 def test_front_poa_matches_pvlib_transposition(wx):
-    p = pvsim.scenario(CFG, "mid", gcr=0.01, bifaciality=0.0, float_cover=0.0)
-    r = pvsim.simulate(wx, SITE, p, WS)
+    p = pvsim.scenario(CFG, "mid", gcr=0.01)
+    r = pvsim.simulate(wx, SITE, p)
     loc = pvlib.location.Location(SITE["latitude"], SITE["longitude"], altitude=SITE["altitude_m"])
     sp = loc.get_solarposition(wx.index, temperature=wx.temp_air)
-    alb = pvlib.albedo.inland_water_dvoracek(sp.elevation, surface_condition=WS)
     ref = pvlib.irradiance.get_total_irradiance(
         p["tilt_deg"], p["azimuth_deg"], sp.apparent_zenith, sp.azimuth, wx.dni, wx.ghi, wx.dhi,
-        dni_extra=pvlib.irradiance.get_extra_radiation(wx.index), albedo=alb, model="haydavies")
+        dni_extra=pvlib.irradiance.get_extra_radiation(wx.index), albedo=p["albedo"], model="haydavies")
     iam = pvlib.iam.physical(pvlib.irradiance.aoi(p["tilt_deg"], p["azimuth_deg"], sp.apparent_zenith, sp.azimuth))
     ref_poa = (ref.poa_direct * iam + ref.poa_diffuse).fillna(0)
     day = sp.elevation > 10
@@ -62,12 +74,37 @@ def test_front_poa_matches_pvlib_transposition(wx):
 
 
 def test_chain_matches_hand_calculation(wx):
-    p = pvsim.scenario(CFG, "mid", bifaciality=0.0, soiling=0.0, mismatch_wiring=0.0, lid_nameplate=0.0,
+    p = pvsim.scenario(CFG, "mid", bifacial_gain=0.0, soiling=0.0, mismatch_wiring=0.0, first_year_degradation=0.0,
                        degradation=0.0, humidity_degradation=0.0, availability=1.0, ac_loss=0.0)
-    r = pvsim.simulate(wx, SITE, p, WS)
+    r = pvsim.simulate(wx, SITE, p)
     i = r.poa.idxmax()
     tcell = wx.temp_air[i] + r.poa[i] * 0.9 * 0.8 / p["u_value"]
     dc = SITE["dc_kwp"] * r.poa[i] / 1000 * (1 + p["temp_coeff"] * (tcell - 25))
-    ac = pvlib.inverter.pvwatts(dc, LIMIT / p["inverter_eff"], eta_inv_nom=p["inverter_eff"])
+    ac = pvlib.inverter.pvwatts(dc, SITE["inverter_ac_kw"] / p["inverter_eff"], eta_inv_nom=p["inverter_eff"])
     assert r.tcell[i] == pytest.approx(tcell, rel=1e-9)
     assert r.ac_kw[i] == pytest.approx(min(ac, LIMIT), rel=1e-9)
+    dcs = np.array([0.0, 5e4, 1.2e5, 1.6e5, 2e5])
+    pdc0 = SITE["inverter_ac_kw"] / p["inverter_eff"]
+    assert np.minimum(pvsim.pvwatts_unclipped(dcs, pdc0, p["inverter_eff"]), SITE["inverter_ac_kw"]) == \
+        pytest.approx(pvlib.inverter.pvwatts(dcs, pdc0, eta_inv_nom=p["inverter_eff"]))
+
+
+def test_every_registry_linked_number_has_a_source():
+    """(c) Every number the page shows from the data carries source ids that exist in the registry."""
+    d = ROOT / "site/data"
+    R = json.loads((d / "results.json").read_text())
+    ids = {s["id"] for s in json.loads((d / "sources.json").read_text())}
+    groups = {
+        "assumptions": [a["src"] for a in json.loads((d / "assumptions.json").read_text())],
+        "stats": [R["stats_src"][k] for k in R["stats"]],
+        "scoreboard": [r["src"] for r in R["scoreboard"]],
+        "claims": [c["src"] for c in R["claims"]],
+        "tornado": [t["src"] for t in R["tornado"]["rows"]],
+        "contradictions": [[v[2]] for c in R["facts"]["contradictions"] for v in c["values"]],
+        "facts": [f[2] for f in R["facts"]["hardware_facts"] + R["facts"]["hydro"]["facts"] + R["facts"]["hydro"]["reservoir_facts"]],
+        "emission_factors": [f["src"] for f in R["facts"]["economics"]["emission_factors"]],
+        "expansion": [x["src"] for x in R["facts"]["expansion"] if x["id"] != "now"],
+    }
+    for g, refs in groups.items():
+        for ref in refs:
+            assert ref and set(ref) <= ids, f"{g}: missing or unknown source {ref}"

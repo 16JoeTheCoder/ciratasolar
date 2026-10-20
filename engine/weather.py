@@ -11,16 +11,23 @@ COLS = ["ghi", "dni", "dhi", "temp_air", "wind_speed"]
 
 
 def load(site_dir, cfg):
+    """Primary weather: NASA POWER (covers 2001 to last full year, so reporting periods use their own weather).
+    Falls back to PVGIS, then to the labelled synthetic series."""
     d = Path(site_dir) / cfg["weather"]["dir"]
-    pvgis = sorted(d.glob("pvgis*"))
     power = sorted(d.glob("power*.json"))
-    if pvgis:
-        return _concat([_pvgis(f) for f in pvgis]), {"source": "PVGIS (JRC) hourly time series", "synthetic": False,
-                                                     "files": [f.name for f in pvgis]}
     if power:
-        return _concat([_power(f) for f in power]), {"source": "NASA POWER hourly (CERES/MERRA-2)", "synthetic": False,
+        return _concat([_power(f) for f in power]), {"source": "NASA POWER hourly", "src": "nasa_power", "synthetic": False,
                                                      "files": [f.name for f in power]}
-    return synthetic(cfg), {"source": "SYNTHETIC clear-sky fallback (not real weather)", "synthetic": True, "files": []}
+    w = crosscheck(site_dir, cfg)
+    if w is not None:
+        return w, {"source": "PVGIS-ERA5 hourly", "src": "pvgis_data", "synthetic": False,
+                   "files": [f.name for f in sorted(d.glob("pvgis*"))]}
+    return synthetic(cfg), {"source": "SYNTHETIC clear-sky fallback (not real weather)", "src": None, "synthetic": True, "files": []}
+
+
+def crosscheck(site_dir, cfg):
+    files = sorted((Path(site_dir) / cfg["weather"]["dir"]).glob("pvgis*"))
+    return _concat([_pvgis(f) for f in files]) if files else None
 
 
 def _concat(frames):

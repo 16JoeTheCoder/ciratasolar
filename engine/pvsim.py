@@ -13,28 +13,47 @@ def scenario(cfg, name, **override):
     return p
 
 
-def simulate(weather, site, p, water_surface, years_since_cod=0.5):
+def pvwatts_unclipped(pdc, pdc0, eta_nom, eta_ref=0.9637):
+    """PVWatts inverter efficiency curve without the output limit (pvlib.inverter.pvwatts before clipping)."""
+    zeta = np.where(pdc > 0, pdc / pdc0, 1.0)
+    eta = eta_nom / eta_ref * (-0.0162 * zeta - 0.0059 / zeta + 0.9858)
+    return np.where(pdc > 0, eta * pdc, 0.0)
+
+
+def degradation_factor(p, years_since_cod):
+    return (1 - p["first_year_degradation"]) * (1 - p["degradation"] - p["humidity_degradation"]) ** max(0.0, years_since_cod - 1)
+
+
+def simulate(weather, site, p, years_since_cod=0.5, stages=False):
     """weather: UTC-indexed DataFrame with ghi, dni, dhi, temp_air, wind_speed (W/m2, degC, m/s).
-    Returns DataFrame with ac_kw (export, capped at the AC limit), poa, tcell, elevation."""
+    Returns DataFrame with ac_kw (export, after both clipping stages), poa, tcell, elevation; with stages=True
+    also the power after each loss step (kW) for the loss waterfall."""
     loc = pvlib.location.Location(site["latitude"], site["longitude"], altitude=site["altitude_m"])
     sp = loc.get_solarposition(weather.index, temperature=weather.temp_air)
     zen, azi = sp.apparent_zenith, sp.azimuth
-    water = pvlib.albedo.inland_water_dvoracek(sp.elevation, surface_condition=water_surface)
-    albedo = water * (1 - p["float_cover"]) + p["float_albedo"] * p["float_cover"]
     aoi = pvlib.irradiance.aoi(p["tilt_deg"], p["azimuth_deg"], zen, azi)
     irr = infinite_sheds.get_irradiance(
         p["tilt_deg"], p["azimuth_deg"], zen, azi, p["gcr"], p["height_m"], p["row_width_m"] / p["gcr"],
-        weather.ghi, weather.dhi, weather.dni, albedo, model="haydavies",
+        weather.ghi, weather.dhi, weather.dni, p["albedo"], model="haydavies",
         dni_extra=pvlib.irradiance.get_extra_radiation(weather.index),
-        iam_front=pvlib.iam.physical(aoi), bifaciality=p["bifaciality"])
-    poa = irr["poa_global"].fillna(0)
-    tcell = pvlib.temperature.pvsyst_cell(irr["poa_front"].fillna(0), weather.temp_air, weather.wind_speed,
+        iam_front=pvlib.iam.physical(aoi), bifaciality=0.0)
+    day = zen < 90
+    poa = irr["poa_front"].fillna(0).where(day, 0.0)
+    tcell = pvlib.temperature.pvsyst_cell(poa, weather.temp_air, weather.wind_speed,
                                           u_c=p["u_value"], u_v=0.0, module_efficiency=0.2)
-    dc = pvlib.pvsystem.pvwatts_dc(poa * (1 - p["soiling"]), tcell, site["dc_kwp"], p["temp_coeff"])
-    deg = (1 - p["degradation"] - p["humidity_degradation"]) ** years_since_cod
-    dc = dc * (1 - p["mismatch_wiring"]) * (1 - p["lid_nameplate"]) * deg
-    inv_ac_kw = site["ac_limit_kw"] / (1 - p["ac_loss"])
-    ac = pvlib.inverter.pvwatts(dc, inv_ac_kw / p["inverter_eff"], eta_inv_nom=p["inverter_eff"])
-    ac = pd.Series(ac, index=weather.index).fillna(0) * (1 - p["ac_loss"]) * p["availability"]
-    ac = ac.clip(0, site["ac_limit_kw"]).where(zen < 90, 0.0)
-    return pd.DataFrame({"ac_kw": ac, "poa": poa, "tcell": tcell, "elevation": sp.elevation})
+    s = {"poa_stc": poa / 1000 * site["dc_kwp"]}
+    s["temperature"] = pvlib.pvsystem.pvwatts_dc(poa, tcell, site["dc_kwp"], p["temp_coeff"])
+    s["soiling"] = s["temperature"] * (1 - p["soiling"])
+    s["dc_other"] = s["soiling"] * (1 - p["mismatch_wiring"]) * degradation_factor(p, years_since_cod)
+    s["bifacial"] = s["dc_other"] * (1 + p["bifacial_gain"])
+    inv_pdc0 = site["inverter_ac_kw"] / p["inverter_eff"]
+    inv = pd.Series(pvwatts_unclipped(s["bifacial"].to_numpy(), inv_pdc0, p["inverter_eff"]), index=weather.index)
+    s["inverter_eff"] = inv * (1 - p["ac_loss"])
+    s["inverter_clip"] = inv.clip(upper=site["inverter_ac_kw"]) * (1 - p["ac_loss"])
+    s["export_cap"] = s["inverter_clip"].clip(upper=site["ac_limit_kw"])
+    s["availability"] = s["export_cap"] * p["availability"]
+    ac = s["availability"].clip(0, site["ac_limit_kw"]).where(day, 0.0)
+    out = pd.DataFrame({"ac_kw": ac, "poa": poa, "tcell": tcell, "elevation": sp.elevation})
+    if stages:
+        out = out.join(pd.DataFrame(s).add_prefix("stage_"))
+    return out

@@ -101,3 +101,60 @@ footer { padding-bottom: 32px; }
   #heat { height: 160px; }
 }
 @media (prefers-reduced-motion: reduce) { .bob, .ripple { animation: none; } }
+
+/* v0.2 additions */
+.tag.inference { color: #7a4fb0; }
+@media (prefers-color-scheme: dark) { .tag.inference { color: #c3a2ef; } }
+.fn { font-size: .62em; margin-left: 1px; line-height: 0; }
+.fn a { color: var(--accent); text-decoration: none; padding: 0 1px; }
+.fn a:hover { text-decoration: underline; }
+summary { cursor: pointer; list-style: none; }
+summary::-webkit-details-marker { display: none; }
+summary h2 { display: inline-flex; margin: 0; }
+summary h2::before { content: "▸"; color: var(--muted); font-size: .8em; margin-right: .2rem; transition: transform .2s; }
+details[open] > summary h2::before { transform: rotate(90deg); }
+details[open] > summary { margin-bottom: .6rem; }
+section > details > summary { margin: -4px 0; }
+h3 { font-size: .95rem; margin: 1rem 0 .4rem; }
+.note { border-left: 3px solid var(--rep); padding: 6px 10px; margin: 10px 0 0; }
+.seg.mini { margin-top: 8px; font-size: .75rem; }
+.seg.mini button { padding: 3px 8px; }
+.arith { font-size: .78rem; margin-top: 6px; }
+.arith summary { color: var(--accent); }
+.arith ol { margin: 4px 0 0; padding-left: 1.1rem; color: var(--muted); }
+.bar .rep.hollow { background: none; border: 2px solid var(--rep); }
+body.synthetic #score .band, body.synthetic #score .p50 { background: var(--env); opacity: .5; }
+body.synthetic #score .verdict { opacity: .7; }
+.wf { display: grid; grid-template-columns: 220px 1fr 60px 56px; gap: 10px; align-items: center; font-size: .85rem; padding: 3px 0; }
+.wfbar { height: 12px; background: var(--line); border-radius: 6px; overflow: hidden; }
+.wfbar i { display: block; height: 100%; background: var(--band); }
+.wf b { text-align: right; font-variant-numeric: tabular-nums; }
+.wf em { font-style: normal; font-size: .78rem; text-align: right; }
+.wf em.neg { color: var(--warn); } .wf em.pos { color: var(--accent); }
+.tor { display: grid; grid-template-columns: 220px 1fr; gap: 4px 10px; align-items: center; font-size: .85rem; padding: 4px 0; }
+.tor small { grid-column: 2; color: var(--muted); }
+.torbar { position: relative; height: 14px; background: linear-gradient(var(--line), var(--line)) 50% 0 / 1px 100% no-repeat; }
+.torbar i { position: absolute; top: 0; height: 100%; border-radius: 3px; }
+.torbar i.neg { background: var(--rep); opacity: .75; } .torbar i.pos { background: var(--band); }
+#monthly text, #hydro text { fill: var(--muted); font-size: 11px; }
+#monthly .wet { fill: #4a90c2; opacity: .12; } #monthly .dry { fill: #d9a441; opacity: .14; }
+#monthly .period { stroke: var(--rep); stroke-width: 2; }
+#hydro { width: 100%; height: auto; }
+#hydro .peak { fill: #4a90c2; opacity: .15; } #hydro .pv { fill: var(--band); opacity: .8; }
+.lab { border-top: 1px solid var(--line); margin-top: 12px; }
+.lab-row { display: grid; grid-template-columns: 120px 1fr 90px; gap: 10px; align-items: center; font-size: .85rem; margin: 6px 0; }
+.lab-row output { font-variant-numeric: tabular-nums; }
+.reservoir { margin-top: 12px; }
+#res-scene svg { width: 100%; max-width: 520px; display: block; border-radius: 8px; }
+#res-scene .lake { transition: transform .3s; }
+.sources li { margin: 6px 0; scroll-margin-top: 80px; border-radius: 6px; }
+.sources li.flash { animation: flash 1.6s; }
+@keyframes flash { 0%, 40% { background: color-mix(in srgb, var(--accent) 22%, transparent); } }
+#hardware th, #hydro-facts th { width: 160px; }
+@media (max-width: 760px) {
+  .wf { grid-template-columns: 1fr 52px 48px; } .wf span { grid-column: 1 / -1; }
+  .tor { grid-template-columns: 1fr; } .tor small { grid-column: 1; }
+  .lab-row { grid-template-columns: 90px 1fr 70px; }
+}
+summary:not(:has(h2))::before { content: "▸ "; color: var(--muted); }
+details[open] > summary:not(:has(h2))::before { content: "▾ "; }

@@ -1,285 +1,910 @@
 {
-  "site": {
-    "id": "cirata",
-    "name": "Cirata Floating Solar PV",
-    "place": "Cirata reservoir, West Java, Indonesia",
-    "latitude": -6.70056,
-    "longitude": 107.36694,
-    "location_note": "Coordinates are the Cirata hydro dam; the array may sit a few km away, so the location is approximate.",
-    "altitude_m": 220,
-    "altitude_note": "Assumed approximate reservoir surface level; affects only air pressure in the clear-sky and sun-position calculations.",
-    "timezone": "Asia/Jakarta",
-    "utc_offset_h": 7,
-    "dc_kwp": 192000,
-    "ac_limit_kw": 145000,
-    "commissioned": "2023-11-09",
-    "parties": "PLN and Masdar (owners); PowerChina (EPC)"
+ "version": "v0.2",
+ "sources_as_of": "2026-10-20",
+ "site": {
+  "id": "cirata",
+  "name": "Cirata Floating Solar PV",
+  "place": "Cirata reservoir, West Java, Indonesia",
+  "latitude": -6.70056,
+  "longitude": 107.36694,
+  "location_note": "Approximate: these are dam coordinates kept as a placeholder because the array centroid is not published; to be traced from Sentinel-2 imagery.",
+  "altitude_m": 220,
+  "altitude_note": "Reservoir full supply level is +220 m; PVGIS terrain data gives 219 m at this point.",
+  "timezone": "Asia/Jakarta",
+  "utc_offset_h": 7,
+  "dc_kwp": 192000,
+  "module_wp": 560,
+  "n_modules": 342857,
+  "n_inverters": 49,
+  "inverter_ac_kw": 153125,
+  "ac_limit_kw": 145000,
+  "commissioned": "2023-11-09",
+  "parties": "PT Pembangkitan Jawa Bali Masdar Solar Energi (PMSE): PJBI (PLN Nusantara Power group) 51% / Masdar 49%; offtaker PT PLN (Persero); BOOT, 25-year PPA; EPC PowerChina Huadong"
+ },
+ "weather": {
+  "dir": "weather",
+  "synthetic_years": 12,
+  "synthetic_seed": 7,
+  "synthetic_mean_clearness": 0.62
+ },
+ "params": {
+  "tilt_deg": {
+   "label": "Module tilt (facing north)",
+   "unit": "deg",
+   "low": 10,
+   "mid": 10,
+   "high": 10,
+   "range": "5-15",
+   "tornado": [
+    5,
+    15
+   ],
+   "class": "ASSUMED",
+   "src": [
+    "assumption",
+    "nsenergy"
+   ],
+   "basis": "Not public. Fixed tilt confirmed (secondary). 10 deg equator-facing base case; 5-15 deg tested in the sensitivity chart."
   },
-  "weather": {
-    "dir": "weather",
-    "water_surface": "green_water_ripples_up_to_2.5cm",
-    "synthetic_years": 12,
-    "synthetic_seed": 7,
-    "synthetic_mean_clearness": 0.62
+  "azimuth_deg": {
+   "label": "Module azimuth",
+   "unit": "deg from N",
+   "low": 0,
+   "mid": 0,
+   "high": 0,
+   "range": "0; east-west as sensitivity only",
+   "class": "ASSUMED",
+   "src": [
+    "assumption"
+   ],
+   "basis": "Not public. North-facing assumed."
   },
-  "params": {
-    "tilt_deg": {
-      "label": "Module tilt",
-      "unit": "deg",
-      "low": 10,
-      "mid": 10,
-      "high": 10,
-      "range": "5-15",
-      "tag": "assumed",
-      "basis": "Floating arrays are typically low tilt. Held fixed; build reports yield at 5 and 15 deg as a sensitivity."
-    },
-    "azimuth_deg": {
-      "label": "Module azimuth",
-      "unit": "deg from N",
-      "low": 0,
-      "mid": 0,
-      "high": 0,
-      "range": "0 (north) or east-west",
-      "tag": "assumed",
-      "basis": "North-facing assumed for a southern-hemisphere site. An east-west layout would change the daily shape; not modelled."
-    },
-    "gcr": {
-      "label": "Ground coverage ratio (row spacing)",
-      "unit": "-",
-      "low": 0.75,
-      "mid": 0.65,
-      "high": 0.55,
-      "tag": "assumed",
-      "basis": "Floating arrays are packed densely; no Cirata layout data. Higher GCR = more row shading."
-    },
-    "row_width_m": {
-      "label": "Row width (module slant length)",
-      "unit": "m",
-      "low": 2.3,
-      "mid": 2.3,
-      "high": 2.3,
-      "range": "1.1-2.4",
-      "tag": "assumed",
-      "basis": "Sets row pitch together with GCR; layout not verified."
-    },
-    "height_m": {
-      "label": "Module height above water",
-      "unit": "m",
-      "low": 0.5,
-      "mid": 0.5,
-      "high": 0.5,
-      "range": "0.3-1.0",
-      "tag": "assumed",
-      "basis": "Typical pontoon float height; only affects rear-side light."
-    },
-    "bifaciality": {
-      "label": "Bifaciality factor",
-      "unit": "-",
-      "low": 0.0,
-      "mid": 0.7,
-      "high": 0.8,
-      "tag": "assumed",
-      "basis": "Module model not verified. Low = monofacial; mid/high = typical glass-glass bifacial."
-    },
-    "float_cover": {
-      "label": "Share of surface under array that is float, not water",
-      "unit": "-",
-      "low": 0.0,
-      "mid": 0.3,
-      "high": 0.5,
-      "tag": "assumed",
-      "basis": "Float design not verified. Floats are lighter than water, raising rear-side light."
-    },
-    "float_albedo": {
-      "label": "Float surface albedo",
-      "unit": "-",
-      "low": 0.5,
-      "mid": 0.5,
-      "high": 0.5,
-      "range": "0.3-0.7",
-      "tag": "assumed",
-      "basis": "White HDPE floats; no measured value found, so wide range."
-    },
-    "u_value": {
-      "label": "Module heat-loss coefficient (cooling)",
-      "unit": "W/m2K",
-      "low": 29,
-      "mid": 35,
-      "high": 50,
-      "tag": "assumed",
-      "basis": "Low = PVsyst free-standing land default (no water cooling credit). Dorenkamper et al. 2021 (Solar Energy 214) report FPV heat-loss coefficients higher than land systems, smaller in the low-wind tropics than in temperate sites; values recalled from the paper, not re-checked, so the range is deliberately wide."
-    },
-    "temp_coeff": {
-      "label": "Power temperature coefficient",
-      "unit": "1/degC",
-      "low": -0.0037,
-      "mid": -0.0034,
-      "high": -0.0029,
-      "tag": "assumed",
-      "basis": "Typical range for PERC to TOPCon/HJT datasheets; module model not verified."
-    },
-    "soiling": {
-      "label": "Soiling loss (dust, bird droppings)",
-      "unit": "fraction",
-      "low": 0.04,
-      "mid": 0.02,
-      "high": 0.01,
-      "tag": "assumed",
-      "basis": "Heavy rain washes panels, but bird droppings are a known FPV issue; no Cirata data."
-    },
-    "mismatch_wiring": {
-      "label": "Mismatch, DC wiring and wave motion",
-      "unit": "fraction",
-      "low": 0.035,
-      "mid": 0.025,
-      "high": 0.015,
-      "tag": "assumed",
-      "basis": "Typical design-tool defaults widened for float movement."
-    },
-    "lid_nameplate": {
-      "label": "Light-induced and nameplate loss",
-      "unit": "fraction",
-      "low": 0.02,
-      "mid": 0.01,
-      "high": 0.003,
-      "tag": "assumed",
-      "basis": "Typical design-tool range."
-    },
-    "availability": {
-      "label": "Availability (uptime)",
-      "unit": "fraction",
-      "low": 0.97,
-      "mid": 0.985,
-      "high": 0.995,
-      "tag": "assumed",
-      "basis": "No outage data published. Grid curtailment is NOT modelled."
-    },
-    "inverter_eff": {
-      "label": "Inverter nominal efficiency",
-      "unit": "fraction",
-      "low": 0.975,
-      "mid": 0.98,
-      "high": 0.985,
-      "tag": "assumed",
-      "basis": "Inverter details not verified; typical central/string inverter range."
-    },
-    "ac_loss": {
-      "label": "AC loss to export point (transformers, cables)",
-      "unit": "fraction",
-      "low": 0.025,
-      "mid": 0.015,
-      "high": 0.01,
-      "tag": "assumed",
-      "basis": "Typical range; grid connection details not verified."
-    },
-    "degradation": {
-      "label": "Module degradation",
-      "unit": "fraction/yr",
-      "low": 0.007,
-      "mid": 0.005,
-      "high": 0.004,
-      "tag": "assumed",
-      "basis": "Typical warranty-level range."
-    },
-    "humidity_degradation": {
-      "label": "Extra degradation from humid over-water environment",
-      "unit": "fraction/yr",
-      "low": 0.003,
-      "mid": 0.001,
-      "high": 0.0,
-      "tag": "assumed",
-      "basis": "No reliable published value found; placeholder range covering zero to a pessimistic extra."
-    }
+  "gcr": {
+   "label": "Ground coverage ratio (row spacing)",
+   "unit": "-",
+   "low": 0.75,
+   "mid": 0.65,
+   "high": 0.55,
+   "class": "ASSUMED",
+   "src": [
+    "assumption"
+   ],
+   "basis": "Row spacing not public. Higher GCR means more row-to-row shading."
   },
-  "economics": {
-    "tariff_usd_kwh": {
-      "label": "Electricity sale price (PPA tariff)",
-      "unit": "US$/kWh",
-      "low": 0.05,
-      "mid": 0.058,
-      "high": 0.07,
-      "tag": "assumed",
-      "basis": "Commonly quoted near 5.8 US cents/kWh in press; not verified here."
-    },
-    "capex_musd": {
-      "label": "Capital cost",
-      "unit": "US$ million",
-      "low": 100,
-      "mid": 115,
-      "high": 130,
-      "tag": "assumed",
-      "basis": "Widely reported order of US$100-130 million; not verified."
-    },
-    "household_kwh_yr": {
-      "label": "Household electricity use",
-      "unit": "kWh/yr",
-      "low": 2400,
-      "mid": 1500,
-      "high": 1200,
-      "tag": "assumed",
-      "basis": "Indonesian household consumption not verified; wide range. Low end of 'homes powered' uses the highest use."
-    },
-    "grid_ef_t_mwh": {
-      "label": "Java-Bali grid emission factor",
-      "unit": "tCO2/MWh",
-      "low": 0.75,
-      "mid": 0.85,
-      "high": 0.95,
-      "tag": "assumed",
-      "basis": "Coal-heavy grid; official factor not verified here."
-    }
+  "row_width_m": {
+   "label": "Row width (module slant length)",
+   "unit": "m",
+   "low": 2.3,
+   "mid": 2.3,
+   "high": 2.3,
+   "range": "1.1-2.4",
+   "class": "ASSUMED",
+   "src": [
+    "assumption"
+   ],
+   "basis": "Sets row pitch together with GCR; layout not public."
   },
-  "reported": [
-    {
-      "id": "pln_158",
-      "label": "Inauguration to June 2024",
-      "gwh": 158,
-      "start": "2023-11-09",
-      "end": "2024-06-30",
-      "source": "pln_nr",
-      "reliability": "high",
-      "kind": "measured",
-      "note": "Primary source, cumulative. End taken as 30 June 2024. Unknown whether pre-inauguration commissioning output is included."
-    },
-    {
-      "id": "sec_267",
-      "label": "Cumulative to mid-Nov 2024",
-      "gwh": 267,
-      "start": "2023-11-09",
-      "end": "2024-11-15",
-      "source": "secondary_2024",
-      "reliability": "medium",
-      "kind": "measured",
-      "note": "Secondary report; 'mid-November' taken as 15 Nov 2024."
-    },
-    {
-      "id": "sec_279",
-      "label": "Calendar 2024",
-      "gwh": 279,
-      "start": "2024-01-01",
-      "end": "2024-12-31",
-      "source": "secondary_2024",
-      "reliability": "medium",
-      "kind": "measured",
-      "note": "Secondary report. Conflicts slightly with the AGM figure below."
-    },
-    {
-      "id": "agm_273",
-      "label": "AGM 2025 figure (probably 2024)",
-      "gwh": 273.68,
-      "start": "2024-01-01",
-      "end": "2024-12-31",
-      "source": "agm_2025",
-      "reliability": "medium",
-      "kind": "measured",
-      "note": "Year not stated in the report; assumed to be calendar 2024."
-    }
-  ],
-  "claimed_annual_gwh": {
-    "low": 245,
-    "high": 300,
-    "source": "claims",
-    "reliability": "low",
-    "note": "Design or press claims, not measurements."
+  "height_m": {
+   "label": "Module height above water",
+   "unit": "m",
+   "low": 0.5,
+   "mid": 0.5,
+   "high": 0.5,
+   "range": "0.3-1.0",
+   "class": "ASSUMED",
+   "src": [
+    "assumption",
+    "sungrow"
+   ],
+   "basis": "1:1 modular HDPE float per module; exact height not public."
+  },
+  "albedo": {
+   "label": "Water/float albedo",
+   "unit": "-",
+   "low": 0.06,
+   "mid": 0.07,
+   "high": 0.08,
+   "tornado": [
+    0.06,
+    0.08
+   ],
+   "class": "ASSUMED",
+   "src": [
+    "assumption",
+    "wb_handbook"
+   ],
+   "basis": "Affects ground-reflected light on the front side."
+  },
+  "bifacial_gain": {
+   "label": "Bifacial rear-side gain",
+   "unit": "fraction",
+   "low": 0.0,
+   "mid": 0.02,
+   "high": 0.03,
+   "tornado": [
+    0.0,
+    0.03
+   ],
+   "class": "ASSUMED",
+   "src": [
+    "assumption",
+    "jinko_datasheet"
+   ],
+   "basis": "Modules are bifacial (datasheet bifaciality 80 +/- 5%), but water reflects little; plant-specific gain not public."
+  },
+  "u_value": {
+   "label": "Cell heat-loss coefficient Uc (cooling)",
+   "unit": "W/m2K",
+   "low": 35,
+   "mid": 37,
+   "high": 50,
+   "tornado": [
+    35,
+    50
+   ],
+   "class": "ASSUMED",
+   "src": [
+    "assumption",
+    "dorenkamper_pvmag",
+    "seris"
+   ],
+   "basis": "Cirata U-value not public. PVsyst free-standing default is about 29; FPV field studies are higher."
+  },
+  "temp_coeff": {
+   "label": "Power temperature coefficient",
+   "unit": "1/degC",
+   "low": -0.003,
+   "mid": -0.003,
+   "high": -0.003,
+   "class": "FIXED",
+   "src": [
+    "jinko_datasheet"
+   ],
+   "basis": "Jinko Tiger Neo datasheet -0.30 %/degC (not Cirata-specific)."
+  },
+  "soiling": {
+   "label": "Soiling loss",
+   "unit": "fraction",
+   "low": 0.04,
+   "mid": 0.02,
+   "high": 0.01,
+   "tornado": [
+    0.04,
+    0.01
+   ],
+   "class": "ASSUMED",
+   "src": [
+    "assumption"
+   ],
+   "basis": "Likely higher in the Jul-Oct dry season; modelled as an annual constant."
+  },
+  "mismatch_wiring": {
+   "label": "Mismatch, DC wiring and wave motion",
+   "unit": "fraction",
+   "low": 0.035,
+   "mid": 0.025,
+   "high": 0.015,
+   "class": "ASSUMED",
+   "src": [
+    "assumption"
+   ],
+   "basis": "Typical design-tool defaults widened for float movement."
+  },
+  "first_year_degradation": {
+   "label": "First-year module degradation",
+   "unit": "fraction",
+   "low": 0.01,
+   "mid": 0.01,
+   "high": 0.01,
+   "class": "FIXED",
+   "src": [
+    "jinko_datasheet"
+   ],
+   "basis": "Jinko warranty: 99% after year 1."
+  },
+  "degradation": {
+   "label": "Annual degradation after year 1",
+   "unit": "fraction/yr",
+   "low": 0.004,
+   "mid": 0.004,
+   "high": 0.004,
+   "class": "FIXED",
+   "src": [
+    "jinko_datasheet"
+   ],
+   "basis": "Jinko warranty: 0.40%/yr linear to 87.4% at year 30."
+  },
+  "humidity_degradation": {
+   "label": "Extra degradation from humid over-water environment",
+   "unit": "fraction/yr",
+   "low": 0.003,
+   "mid": 0.001,
+   "high": 0.0,
+   "class": "ASSUMED",
+   "src": [
+    "assumption"
+   ],
+   "basis": "No reliable published value; placeholder range. Negligible in operating year 1."
+  },
+  "inverter_eff": {
+   "label": "Inverter nominal efficiency",
+   "unit": "fraction",
+   "low": 0.975,
+   "mid": 0.98,
+   "high": 0.985,
+   "class": "ASSUMED",
+   "src": [
+    "assumption"
+   ],
+   "basis": "Inverter make/model not public; typical central inverter range."
+  },
+  "ac_loss": {
+   "label": "AC loss to export point (600 V to 20 kV to 150 kV)",
+   "unit": "fraction",
+   "low": 0.025,
+   "mid": 0.015,
+   "high": 0.01,
+   "class": "ASSUMED",
+   "src": [
+    "assumption"
+   ],
+   "basis": "Transformer and cable losses not public."
+  },
+  "availability": {
+   "label": "Availability (uptime)",
+   "unit": "fraction",
+   "low": 0.95,
+   "mid": 0.97,
+   "high": 0.99,
+   "tornado": [
+    0.95,
+    0.99
+   ],
+   "class": "ASSUMED",
+   "src": [
+    "assumption",
+    "ugm"
+   ],
+   "basis": "Not public. Only qualitative fault history (20 kV cable terminations, ground faults). Curtailment not modelled."
   }
+ },
+ "economics": {
+  "tariff_usd_mwh": 58.179,
+  "tariff_src": [
+   "nsenergy"
+  ],
+  "capex_musd": [
+   129,
+   143
+  ],
+  "capex_note": "Rp1.7 trillion (official remarks); US$129M (Jakarta Post 2020, IPB thesis); US$143M (Listrik Indonesia). Unverified.",
+  "capex_src": [
+   "jakpost_2020",
+   "ipb",
+   "listrik_id"
+  ],
+  "household_kwh": 1519,
+  "household_note": "ESDM 2024: PLN household sales 130,433,102 MWh / 85,844,540 electrified households.",
+  "household_src": [
+   "esdm_stat2024"
+  ],
+  "official_homes": 50000,
+  "official_homes_src": [
+   "dossier_unattributed"
+  ],
+  "emission_factors": [
+   {
+    "value": 0.87,
+    "label": "0.87 project-implied",
+    "note": "214,000 t / 245,000 MWh = 0.8735 (design case); UGM 243,670 t / 279,000 MWh = 0.8734.",
+    "src": [
+     "ugm",
+     "dossier_unattributed"
+    ]
+   },
+   {
+    "value": 0.84,
+    "label": "0.84",
+    "note": "Secondary value; disagrees with others.",
+    "src": [
+     "dossier_unattributed"
+    ]
+   },
+   {
+    "value": 0.8,
+    "label": "0.80",
+    "note": "Secondary value; disagrees with others.",
+    "src": [
+     "dossier_unattributed"
+    ]
+   }
+  ],
+  "emission_note": "Official Jamali combined-margin factor not confirmed: Kepmen ESDM 163.K/HK.02/MEM.S/2021 exists, appendix not verified.",
+  "emission_src": [
+   "kepmen163",
+   "esdm_ghg"
+  ],
+  "ugm_bpp_note": "UGM: production cost 1.25 US cents/kWh below BPP, implying BPP about 7.1 c/kWh (inference).",
+  "not_public": [
+   "O&M cost",
+   "Insurance",
+   "Reservoir fees",
+   "Tax terms",
+   "Equity IRR",
+   "PPA indexation",
+   "Deemed dispatch",
+   "Curtailment compensation",
+   "IDR payment mechanics",
+   "Debt terms (reported US$114M vs about US$140M)"
+  ]
+ },
+ "expansion": [
+  {
+   "id": "now",
+   "label": "Built: 192 MWp / 145 MWac",
+   "mwp": 192,
+   "mwac": 145
+  },
+  {
+   "id": "p2030",
+   "label": "PLN NP target: 500 MWp by 2030 (plan, not commitment)",
+   "mwp": 500,
+   "src": [
+    "bernas"
+   ]
+  },
+  {
+   "id": "dec2025",
+   "label": "Dec 2025: about 700 MWac total (plan, not commitment)",
+   "mwac": 700,
+   "src": [
+    "antara"
+   ]
+  }
+ ],
+ "area_ha": 250,
+ "water_area_ha": 200,
+ "reservoir_ha": 6200,
+ "reported": [
+  {
+   "id": "pln_158",
+   "label": "Inauguration to June 2024",
+   "gwh": 158,
+   "start": "2023-11-09",
+   "end": "2024-06-30",
+   "src": [
+    "plnnr"
+   ],
+   "reliability": "primary",
+   "note": "235 days = 672 MWh/day = 3.50 kWh/kWp/day, annualises to 245 GWh. Gross or net: not stated."
+  },
+  {
+   "id": "sec_267",
+   "label": "Cumulative to mid-Nov 2024",
+   "gwh": 267,
+   "start": "2023-11-09",
+   "end": "2024-11-15",
+   "src": [
+    "sec_267"
+   ],
+   "reliability": "secondary",
+   "note": "'Mid-November' taken as 15 Nov 2024. Gross or net: not stated."
+  },
+  {
+   "id": "sec_279",
+   "label": "Calendar 2024",
+   "gwh": 279,
+   "start": "2024-01-01",
+   "end": "2024-12-31",
+   "src": [
+    "ecobiz"
+   ],
+   "reliability": "secondary",
+   "note": "Single article. Implies 1,453 kWh/kWp, AC capacity factor 21.9%, DC 16.5%. Gross or net: not stated."
+  },
+  {
+   "id": "agm_273",
+   "label": "AGM 2025 figure (probably 2024)",
+   "gwh": 273.68,
+   "start": "2024-01-01",
+   "end": "2024-12-31",
+   "src": [
+    "agm_2025"
+   ],
+   "reliability": "secondary",
+   "note": "Year not stated. Conflicts with 279 GWh by 1.9%. Gross or net: not stated."
+  }
+ ],
+ "claims": [
+  {
+   "label": "Design: 245 GWh/yr",
+   "range": [
+    245,
+    245
+   ],
+   "who": "ESDM / PLN NP, Nov 2023",
+   "src": [
+    "suarasurabaya"
+   ]
+  },
+  {
+   "label": "250-300 GWh/yr",
+   "range": [
+    250,
+    300
+   ],
+   "who": "PMSE",
+   "src": [
+    "kontan"
+   ]
+  },
+  {
+   "label": "300 GWh/yr",
+   "range": [
+    300,
+    300
+   ],
+   "who": "JinkoSolar",
+   "src": [
+    "jinko_pvmag"
+   ]
+  },
+  {
+   "label": "More than 200 GWh/yr",
+   "range": [
+    200,
+    null
+   ],
+   "who": "PLN NP, Feb 2025",
+   "src": [
+    "plnnp_2025"
+   ]
+  },
+  {
+   "label": "Capable of 300 GWh/yr",
+   "range": [
+    300,
+    300
+   ],
+   "who": "PLN NP via Warta Ekonomi / Dunia Energi",
+   "src": [
+    "warta_dunia"
+   ]
+  }
+ ],
+ "ugm_claim": "UGM thesis: output 95% of target; PR 'up to 93%' (best month, not annual); +17% PR vs nearby ground PV. The 17% is not a cooling effect (measured FPV cooling gain is 1-6%): it mixes module age, technology and O&M. Shown as a claim only, never a model input.",
+ "seasonality_inference": {
+  "h1_gwh": 122,
+  "h2_gwh": 157,
+  "note": "Inference: assumes a flat daily rate inside the 158 GWh cumulative figure; Jul-Dec about 27% higher per day.",
+  "src": [
+   "plnnr",
+   "ecobiz"
+  ]
+ },
+ "poa_check": {
+  "specific_yield": 1453,
+  "pr": [
+   0.85,
+   0.93
+  ],
+  "src": [
+   "ecobiz"
+  ]
+ },
+ "hydro": {
+  "facts": [
+   [
+    "PLTA Cirata",
+    "8 Francis units, 1,008 MW, operating since 1988",
+    [
+     "idwiki_plta",
+     "enwiki_dam"
+    ]
+   ],
+   [
+    "Operation",
+    "Peaker, mainly 17:00-22:00; capacity factor about 15-16%; about 1,350 GWh/yr vs 1,428 design",
+    [
+     "kumparan",
+     "idwiki_plta"
+    ]
+   ],
+   [
+    "Grid",
+    "PV exports at 150 kV, hydro at 500 kV",
+    [
+     "pmse",
+     "idwiki_plta"
+    ]
+   ],
+   [
+    "Curtailment for hydro",
+    "No public evidence",
+    [
+     "assumption"
+    ]
+   ]
+  ],
+  "window": [
+   17,
+   22
+  ],
+  "level_band_m": [
+   205,
+   220
+  ],
+  "reservoir_facts": [
+   [
+    "Water level band",
+    "Full supply +220 m; units stop below +205 m (about 15 m operating band)",
+    [
+     "pupr",
+     "pikiran"
+    ]
+   ],
+   [
+    "Storage",
+    "Normal storage 2,165 million m3",
+    [
+     "enwiki_dam"
+    ]
+   ],
+   [
+    "Seasons",
+    "Dry about Jun-Oct, wet about Nov-Apr (inference)",
+    [
+     "assumption"
+    ]
+   ],
+   [
+    "Fish cages (KJA)",
+    "About 100,000 vs ideal about 7,200 (Jul 2026); earlier counts 93,641-120,000 conflict",
+    [
+     "citarum"
+    ]
+   ],
+   [
+    "Other risks",
+    "Water hyacinth; sedimentation, thick silt and steep slopes; water quality 'level three' vs PLN NP 'stable' (conflict); lightning: no Cirata-specific data",
+    [
+     "sungrow",
+     "plnnp_2025"
+    ]
+   ],
+   [
+    "Level feed",
+    "No public real-time level feed",
+    [
+     "assumption"
+    ]
+   ]
+  ]
+ },
+ "hardware_facts": [
+  [
+   "Modules",
+   "560 Wp, 342,857 modules ('more than 340,000'); Jinko Tiger Neo bifacial N-type TOPCon, double-glass",
+   [
+    "pmse",
+    "jinko_pvmag"
+   ]
+  ],
+  [
+   "Inverters",
+   "49 central x 3,400 kVA (3,125 kW + 2,500 kVAR), 1,500 Vdc in, 600 Vac out; total 153.1 MWac; make/model not public",
+   [
+    "dossier_unattributed"
+   ]
+  ],
+  [
+   "DC/AC",
+   "192 / 153.1 = 1.254 at inverters; 192 / 145 = 1.324 vs export limit. Two clipping stages are modelled.",
+   [
+    "dossier_unattributed"
+   ]
+  ],
+  [
+   "Grid connection",
+   "600 V to 20 kV, onshore 150/20 kV, 150 kV Java-Bali via 3.2 km double circuit",
+   [
+    "pmse",
+    "abb"
+   ]
+  ],
+  [
+   "Floats",
+   "1:1 HDPE float per module (Sungrow TS30M truss, PT60 pontoon), Chandra Asri resin, steel barges for inverters, 2,100 concrete anchors",
+   [
+    "sungrow",
+    "chandra_asri"
+   ]
+  ],
+  [
+   "Layout",
+   "13 islands, each about 430 m x 230 m; illustrative only (26,374 modules per island derived vs 'over 28,000' reported; 49 inverters / 13 islands is about 3.8, so islands differ)",
+   [
+    "cri"
+   ]
+  ],
+  [
+   "Area",
+   "About 250 ha incl. land (about 200 ha water) of a 6,200 ha reservoir: 4.0% coverage (3.2% water only)",
+   [
+    "dossier_unattributed",
+    "enwiki_dam"
+   ]
+  ],
+  [
+   "Timeline",
+   "Financial close 2-3 Aug 2021; first grid sync Oct 2023; inaugurated 9 Nov 2023; single phase",
+   [
+    "masdar_fc",
+    "taiyang",
+    "plnnr"
+   ]
+  ]
+ ],
+ "contradictions": [
+  {
+   "topic": "Module rating",
+   "values": [
+    [
+     "560 Wp",
+     "PMSE",
+     "pmse"
+    ],
+    [
+     "570 W",
+     "JinkoSolar",
+     "jinko_pvmag"
+    ]
+   ],
+   "used": "560 Wp (570 W gives 336,842 modules, inconsistent with 'more than 340,000')"
+  },
+  {
+   "topic": "Array area",
+   "values": [
+    [
+     "about 200 ha water",
+     "dossier (source not recorded)",
+     "dossier_unattributed"
+    ],
+    [
+     "about 250 ha incl. land",
+     "dossier (source not recorded)",
+     "dossier_unattributed"
+    ]
+   ],
+   "used": "250 ha total, 200 ha water"
+  },
+  {
+   "topic": "Reservoir coverage",
+   "values": [
+    [
+     "4.0% (250/6,200)",
+     "derived",
+     "assumption"
+    ],
+    [
+     "20%",
+     "id.wikipedia",
+     "idwiki_plts"
+    ]
+   ],
+   "used": "4.0%; 20% confuses the regulatory ceiling with coverage"
+  },
+  {
+   "topic": "Annual output claims",
+   "values": [
+    [
+     "245 GWh",
+     "ESDM / PLN NP",
+     "suarasurabaya"
+    ],
+    [
+     "250-300 GWh",
+     "PMSE",
+     "kontan"
+    ],
+    [
+     "300 GWh",
+     "JinkoSolar",
+     "jinko_pvmag"
+    ],
+    [
+     ">200 GWh",
+     "PLN NP",
+     "plnnp_2025"
+    ]
+   ],
+   "used": "Shown as claims only, never as inputs"
+  },
+  {
+   "topic": "World ranking",
+   "values": [
+    [
+     "3rd largest",
+     "President, Nov 2023",
+     "suarasurabaya"
+    ],
+    [
+     "5th largest",
+     "PLN NP, Feb 2025",
+     "plnnp_2025"
+    ]
+   ],
+   "used": "Not used"
+  },
+  {
+   "topic": "PPA signed",
+   "values": [
+    [
+     "2020",
+     "PMSE",
+     "pmse"
+    ],
+    [
+     "Jan 2021",
+     "Power Technology, NS Energy",
+     "nsenergy"
+    ]
+   ],
+   "used": "Not used in the model"
+  },
+  {
+   "topic": "Transmission line",
+   "values": [
+    [
+     "3.2 km",
+     "PMSE",
+     "pmse"
+    ],
+    [
+     "about 4 km",
+     "one source",
+     "dossier_unattributed"
+    ]
+   ],
+   "used": "3.2 km"
+  },
+  {
+   "topic": "Homes powered",
+   "values": [
+    [
+     "50,000 homes",
+     "official",
+     "dossier_unattributed"
+    ],
+    [
+     "about 183,700 homes",
+     "ESDM-derived, 1,519 kWh",
+     "esdm_stat2024"
+    ]
+   ],
+   "used": "ESDM-derived by default; official as a toggle"
+  },
+  {
+   "topic": "Capex",
+   "values": [
+    [
+     "US$95M",
+     "2025 review (looks partial)",
+     "dossier_unattributed"
+    ],
+    [
+     "US$129M",
+     "Jakarta Post, IPB",
+     "jakpost_2020"
+    ],
+    [
+     "US$143M",
+     "Listrik Indonesia",
+     "listrik_id"
+    ],
+    [
+     "Rp1.7T",
+     "official remarks",
+     "dossier_unattributed"
+    ]
+   ],
+   "used": "US$129-143M, unverified"
+  },
+  {
+   "topic": "Debt",
+   "values": [
+    [
+     "US$114M",
+     "sponsor article",
+     "dossier_unattributed"
+    ],
+    [
+     "about US$140M",
+     "PLN president director via Bisnis.com",
+     "dossier_unattributed"
+    ]
+   ],
+   "used": "Not used (implied gearing 80-88%, not public)"
+  },
+  {
+   "topic": "2024 output",
+   "values": [
+    [
+     "279 GWh",
+     "Ecobiz",
+     "ecobiz"
+    ],
+    [
+     "273.7 GWh",
+     "AGM 2025",
+     "agm_2025"
+    ]
+   ],
+   "used": "Both shown on the scoreboard (1.9% apart)"
+  },
+  {
+   "topic": "Fish cages",
+   "values": [
+    [
+     "about 100,000",
+     "Satgas Citarum Harum, Jul 2026",
+     "citarum"
+    ],
+    [
+     "93,641-120,000",
+     "earlier counts",
+     "dossier_unattributed"
+    ]
+   ],
+   "used": "about 100,000 (latest primary)"
+  },
+  {
+   "topic": "Panels per island",
+   "values": [
+    [
+     "over 28,000",
+     "PowerChina via CRI",
+     "cri"
+    ],
+    [
+     "26,374",
+     "derived 342,857 / 13",
+     "assumption"
+    ]
+   ],
+   "used": "Layout shown as illustrative only"
+  },
+  {
+   "topic": "PR advantage",
+   "values": [
+    [
+     "+17% PR vs ground PV",
+     "UGM thesis",
+     "ugm"
+    ],
+    [
+     "1-6% cooling gain",
+     "FPV literature",
+     "dorenkamper_pvmag"
+    ]
+   ],
+   "used": "17% shown as a flagged claim; not a model input"
+  }
+ ],
+ "not_public": [
+  "Tilt",
+  "Azimuth",
+  "Row spacing",
+  "Availability",
+  "Gross vs net metering of reported output",
+  "PPA indexation, deemed dispatch, curtailment",
+  "O&M cost",
+  "Inverter make/model",
+  "Hourly or monthly metered output",
+  "Cirata U-value",
+  "Bifaciality factor for this plant",
+  "Official Jamali combined-margin emission factor",
+  "Reservoir level feed",
+  "Array centroid coordinates"
+ ]
 }
