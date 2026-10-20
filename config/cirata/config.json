@@ -1,0 +1,285 @@
+{
+  "site": {
+    "id": "cirata",
+    "name": "Cirata Floating Solar PV",
+    "place": "Cirata reservoir, West Java, Indonesia",
+    "latitude": -6.70056,
+    "longitude": 107.36694,
+    "location_note": "Coordinates are the Cirata hydro dam; the array may sit a few km away, so the location is approximate.",
+    "altitude_m": 220,
+    "altitude_note": "Assumed approximate reservoir surface level; affects only air pressure in the clear-sky and sun-position calculations.",
+    "timezone": "Asia/Jakarta",
+    "utc_offset_h": 7,
+    "dc_kwp": 192000,
+    "ac_limit_kw": 145000,
+    "commissioned": "2023-11-09",
+    "parties": "PLN and Masdar (owners); PowerChina (EPC)"
+  },
+  "weather": {
+    "dir": "weather",
+    "water_surface": "green_water_ripples_up_to_2.5cm",
+    "synthetic_years": 12,
+    "synthetic_seed": 7,
+    "synthetic_mean_clearness": 0.62
+  },
+  "params": {
+    "tilt_deg": {
+      "label": "Module tilt",
+      "unit": "deg",
+      "low": 10,
+      "mid": 10,
+      "high": 10,
+      "range": "5-15",
+      "tag": "assumed",
+      "basis": "Floating arrays are typically low tilt. Held fixed; build reports yield at 5 and 15 deg as a sensitivity."
+    },
+    "azimuth_deg": {
+      "label": "Module azimuth",
+      "unit": "deg from N",
+      "low": 0,
+      "mid": 0,
+      "high": 0,
+      "range": "0 (north) or east-west",
+      "tag": "assumed",
+      "basis": "North-facing assumed for a southern-hemisphere site. An east-west layout would change the daily shape; not modelled."
+    },
+    "gcr": {
+      "label": "Ground coverage ratio (row spacing)",
+      "unit": "-",
+      "low": 0.75,
+      "mid": 0.65,
+      "high": 0.55,
+      "tag": "assumed",
+      "basis": "Floating arrays are packed densely; no Cirata layout data. Higher GCR = more row shading."
+    },
+    "row_width_m": {
+      "label": "Row width (module slant length)",
+      "unit": "m",
+      "low": 2.3,
+      "mid": 2.3,
+      "high": 2.3,
+      "range": "1.1-2.4",
+      "tag": "assumed",
+      "basis": "Sets row pitch together with GCR; layout not verified."
+    },
+    "height_m": {
+      "label": "Module height above water",
+      "unit": "m",
+      "low": 0.5,
+      "mid": 0.5,
+      "high": 0.5,
+      "range": "0.3-1.0",
+      "tag": "assumed",
+      "basis": "Typical pontoon float height; only affects rear-side light."
+    },
+    "bifaciality": {
+      "label": "Bifaciality factor",
+      "unit": "-",
+      "low": 0.0,
+      "mid": 0.7,
+      "high": 0.8,
+      "tag": "assumed",
+      "basis": "Module model not verified. Low = monofacial; mid/high = typical glass-glass bifacial."
+    },
+    "float_cover": {
+      "label": "Share of surface under array that is float, not water",
+      "unit": "-",
+      "low": 0.0,
+      "mid": 0.3,
+      "high": 0.5,
+      "tag": "assumed",
+      "basis": "Float design not verified. Floats are lighter than water, raising rear-side light."
+    },
+    "float_albedo": {
+      "label": "Float surface albedo",
+      "unit": "-",
+      "low": 0.5,
+      "mid": 0.5,
+      "high": 0.5,
+      "range": "0.3-0.7",
+      "tag": "assumed",
+      "basis": "White HDPE floats; no measured value found, so wide range."
+    },
+    "u_value": {
+      "label": "Module heat-loss coefficient (cooling)",
+      "unit": "W/m2K",
+      "low": 29,
+      "mid": 35,
+      "high": 50,
+      "tag": "assumed",
+      "basis": "Low = PVsyst free-standing land default (no water cooling credit). Dorenkamper et al. 2021 (Solar Energy 214) report FPV heat-loss coefficients higher than land systems, smaller in the low-wind tropics than in temperate sites; values recalled from the paper, not re-checked, so the range is deliberately wide."
+    },
+    "temp_coeff": {
+      "label": "Power temperature coefficient",
+      "unit": "1/degC",
+      "low": -0.0037,
+      "mid": -0.0034,
+      "high": -0.0029,
+      "tag": "assumed",
+      "basis": "Typical range for PERC to TOPCon/HJT datasheets; module model not verified."
+    },
+    "soiling": {
+      "label": "Soiling loss (dust, bird droppings)",
+      "unit": "fraction",
+      "low": 0.04,
+      "mid": 0.02,
+      "high": 0.01,
+      "tag": "assumed",
+      "basis": "Heavy rain washes panels, but bird droppings are a known FPV issue; no Cirata data."
+    },
+    "mismatch_wiring": {
+      "label": "Mismatch, DC wiring and wave motion",
+      "unit": "fraction",
+      "low": 0.035,
+      "mid": 0.025,
+      "high": 0.015,
+      "tag": "assumed",
+      "basis": "Typical design-tool defaults widened for float movement."
+    },
+    "lid_nameplate": {
+      "label": "Light-induced and nameplate loss",
+      "unit": "fraction",
+      "low": 0.02,
+      "mid": 0.01,
+      "high": 0.003,
+      "tag": "assumed",
+      "basis": "Typical design-tool range."
+    },
+    "availability": {
+      "label": "Availability (uptime)",
+      "unit": "fraction",
+      "low": 0.97,
+      "mid": 0.985,
+      "high": 0.995,
+      "tag": "assumed",
+      "basis": "No outage data published. Grid curtailment is NOT modelled."
+    },
+    "inverter_eff": {
+      "label": "Inverter nominal efficiency",
+      "unit": "fraction",
+      "low": 0.975,
+      "mid": 0.98,
+      "high": 0.985,
+      "tag": "assumed",
+      "basis": "Inverter details not verified; typical central/string inverter range."
+    },
+    "ac_loss": {
+      "label": "AC loss to export point (transformers, cables)",
+      "unit": "fraction",
+      "low": 0.025,
+      "mid": 0.015,
+      "high": 0.01,
+      "tag": "assumed",
+      "basis": "Typical range; grid connection details not verified."
+    },
+    "degradation": {
+      "label": "Module degradation",
+      "unit": "fraction/yr",
+      "low": 0.007,
+      "mid": 0.005,
+      "high": 0.004,
+      "tag": "assumed",
+      "basis": "Typical warranty-level range."
+    },
+    "humidity_degradation": {
+      "label": "Extra degradation from humid over-water environment",
+      "unit": "fraction/yr",
+      "low": 0.003,
+      "mid": 0.001,
+      "high": 0.0,
+      "tag": "assumed",
+      "basis": "No reliable published value found; placeholder range covering zero to a pessimistic extra."
+    }
+  },
+  "economics": {
+    "tariff_usd_kwh": {
+      "label": "Electricity sale price (PPA tariff)",
+      "unit": "US$/kWh",
+      "low": 0.05,
+      "mid": 0.058,
+      "high": 0.07,
+      "tag": "assumed",
+      "basis": "Commonly quoted near 5.8 US cents/kWh in press; not verified here."
+    },
+    "capex_musd": {
+      "label": "Capital cost",
+      "unit": "US$ million",
+      "low": 100,
+      "mid": 115,
+      "high": 130,
+      "tag": "assumed",
+      "basis": "Widely reported order of US$100-130 million; not verified."
+    },
+    "household_kwh_yr": {
+      "label": "Household electricity use",
+      "unit": "kWh/yr",
+      "low": 2400,
+      "mid": 1500,
+      "high": 1200,
+      "tag": "assumed",
+      "basis": "Indonesian household consumption not verified; wide range. Low end of 'homes powered' uses the highest use."
+    },
+    "grid_ef_t_mwh": {
+      "label": "Java-Bali grid emission factor",
+      "unit": "tCO2/MWh",
+      "low": 0.75,
+      "mid": 0.85,
+      "high": 0.95,
+      "tag": "assumed",
+      "basis": "Coal-heavy grid; official factor not verified here."
+    }
+  },
+  "reported": [
+    {
+      "id": "pln_158",
+      "label": "Inauguration to June 2024",
+      "gwh": 158,
+      "start": "2023-11-09",
+      "end": "2024-06-30",
+      "source": "pln_nr",
+      "reliability": "high",
+      "kind": "measured",
+      "note": "Primary source, cumulative. End taken as 30 June 2024. Unknown whether pre-inauguration commissioning output is included."
+    },
+    {
+      "id": "sec_267",
+      "label": "Cumulative to mid-Nov 2024",
+      "gwh": 267,
+      "start": "2023-11-09",
+      "end": "2024-11-15",
+      "source": "secondary_2024",
+      "reliability": "medium",
+      "kind": "measured",
+      "note": "Secondary report; 'mid-November' taken as 15 Nov 2024."
+    },
+    {
+      "id": "sec_279",
+      "label": "Calendar 2024",
+      "gwh": 279,
+      "start": "2024-01-01",
+      "end": "2024-12-31",
+      "source": "secondary_2024",
+      "reliability": "medium",
+      "kind": "measured",
+      "note": "Secondary report. Conflicts slightly with the AGM figure below."
+    },
+    {
+      "id": "agm_273",
+      "label": "AGM 2025 figure (probably 2024)",
+      "gwh": 273.68,
+      "start": "2024-01-01",
+      "end": "2024-12-31",
+      "source": "agm_2025",
+      "reliability": "medium",
+      "kind": "measured",
+      "note": "Year not stated in the report; assumed to be calendar 2024."
+    }
+  ],
+  "claimed_annual_gwh": {
+    "low": 245,
+    "high": 300,
+    "source": "claims",
+    "reliability": "low",
+    "note": "Design or press claims, not measurements."
+  }
+}

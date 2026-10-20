@@ -1,0 +1,5 @@
+engine/node_modules/
+__pycache__/
+.pytest_cache/
+config/*/weather/*
+!config/*/weather/README.md

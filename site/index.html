@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cirata Floating Solar</title>
+<meta name="description" content="Modelled yield of the 192 MWp Cirata floating solar plant, West Java, checked against its sparse public reports.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="loader" aria-hidden="true">
+  <canvas id="map"></canvas>
+  <p id="loader-label">Cirata · West Java</p>
+  <button id="skip" type="button">Skip</button>
+</div>
+
+<header>
+  <div class="wrap head">
+    <div>
+      <h1>Cirata Floating Solar</h1>
+      <p class="sub">192 MWp DC · 145 MWac · Cirata reservoir, West Java, Indonesia</p>
+    </div>
+    <div class="controls">
+      <div class="seg" role="group" aria-label="View mode">
+        <button type="button" data-mode="light" aria-pressed="true">Light</button>
+        <button type="button" data-mode="detailed" aria-pressed="false">Detailed</button>
+      </div>
+      <a class="btn" href="brief.pdf" download>PDF brief</a>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <p id="synthetic" class="banner danger" hidden><strong>Synthetic weather.</strong> No real weather data was available when these numbers were built. Every figure on this page tests the pipeline only and is <strong>not</strong> an estimate of Cirata's output.</p>
+  <p class="banner tier"><strong>What this is:</strong> Cirata publishes only annual and cumulative output, so this is a forecast from a physics model, checked against sparse reports. It is not a calibrated model and it is not live data.</p>
+
+  <section class="scene-card">
+    <svg id="scene" viewBox="0 0 800 300" role="img" aria-label="Animated drawing of the floating plant, lit by the modelled sun position">
+      <defs>
+        <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop id="sky0" offset="0"/><stop id="sky1" offset="1"/></linearGradient>
+        <linearGradient id="water" x1="0" y1="0" x2="0" y2="1"><stop id="w0" offset="0"/><stop id="w1" offset="1"/></linearGradient>
+        <radialGradient id="sunglow"><stop offset="0" stop-color="#fff6c8"/><stop offset=".35" stop-color="#ffd25e"/><stop offset="1" stop-color="#ffd25e" stop-opacity="0"/></radialGradient>
+      </defs>
+      <rect width="800" height="300" fill="url(#sky)"/>
+      <circle id="sun" r="46" fill="url(#sunglow)"/>
+      <path class="hill" d="M0 200 Q90 150 190 185 T380 175 Q470 140 560 180 T800 170 V215 H0Z"/>
+      <rect y="205" width="800" height="95" fill="url(#water)"/>
+      <g id="ripples"></g>
+      <g id="array"></g>
+    </svg>
+    <div class="readout">
+      <p class="now"><span id="now-mw">–</span> <span class="unit">MW</span> <button class="info" data-k="now">i</button></p>
+      <p id="now-label" class="muted"></p>
+      <p class="muted small">Modelled typical value for this hour and month, not live. <span id="now-range"></span></p>
+      <div class="scrub">
+        <label>Month <select id="month"></select></label>
+        <label>Hour (WIB) <input id="hour" type="range" min="0" max="23" step="1"></label>
+        <button id="reset-now" type="button" class="link">Now</button>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Modelled year</h2>
+    <div id="stats" class="stats"></div>
+  </section>
+
+  <section>
+    <h2>Hour-by-day yield <button class="info" data-k="heatmap">i</button></h2>
+    <p class="muted small" id="heat-cap"></p>
+    <div class="heat"><canvas id="heat"></canvas></div>
+    <div class="legend"><span>0 MW</span><i id="heat-scale"></i><span>145 MW</span></div>
+  </section>
+
+  <section>
+    <h2>Scoreboard: model vs reports <button class="info" data-k="scoreboard">i</button></h2>
+    <p class="muted small">Reported figures were not used to set any parameter. Each row shows what the model expects for exactly that reporting period.</p>
+    <div id="score"></div>
+    <div class="key small muted"><span><i class="k env"></i>Envelope (all scenarios, all weather years)</span><span><i class="k band"></i>Mid scenario, 10th–90th percentile of weather years</span><span><i class="k p50"></i>Mid median</span><span><i class="k rep"></i>Reported</span></div>
+  </section>
+
+  <section class="detail">
+    <h2>Monthly energy <button class="info" data-k="monthly">i</button></h2>
+    <svg id="monthly" viewBox="0 0 640 220" role="img" aria-label="Monthly energy bars"></svg>
+  </section>
+
+  <section class="detail">
+    <h2>Assumptions <button class="info" data-k="tags">i</button></h2>
+    <div class="table-wrap"><table id="assump"><thead><tr><th>Item</th><th>Low</th><th>Mid</th><th>High</th><th>Unit</th><th>Tag</th><th>Basis</th></tr></thead><tbody></tbody></table></div>
+    <p class="muted small" id="sens"></p>
+  </section>
+
+  <section class="detail">
+    <h2>Sources</h2>
+    <ul id="sources" class="sources"></ul>
+    <p class="muted small" id="meta"></p>
+  </section>
+</main>
+
+<div id="pop" role="dialog" hidden><p></p><button type="button">Close</button></div>
+<footer class="wrap muted small">Student beta. Built with pvlib; weather, parameters and provenance are listed under Detailed. Times shown in WIB (UTC+7).</footer>
+<script src="app.js"></script>
+</body>
+</html>
